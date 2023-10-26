@@ -1,87 +1,94 @@
-class maxHeap {
-    constructor() {
-        this.heap = [];
-        this.elements = 0;
+export class MaxHeap {
+    constructor(data = new Array()) {
+        this.data = data;
+        this.compareVal = (a, b) => b - a;
+        this.heapify();
     }
 
-    insert(val) {
-        if (this.elements >= this.heap.length){
-           this.elements = this.elements + 1
-           this.heap.push(val);
-           this.__percolateUp(this.heap.length - 1);
+    heapify() {
+        if (this.size() < 2) {
+            return;
         }
-       else{
-           this.heap[this.elements] = val;
-           this.elements = this.elements + 1
-           this.__percolateUp(this.elements - 1);
-       }
+        for (let i = 0; i < this.size(); i++) {
+            this.percolateUp(i);
+        }
     }
 
-    getMax() {
-        if (this.elements != 0)
-            return this.heap[0]
-        return null;
-    }
-
-    removeMax() {
-        if (this.elements > 1) {
-            var max = this.heap[0]
-            this.heap[0] = this.heap[this.elements - 1]
-            this.elements = this.elements - 1
-            this.__maxHeapify(0)
-            return max
-        } else if (this.elements == 1) {
-            var max = this.heap[0]
-            this.elements = this.elements - 1
-            return max
-        } else {
+    peek() {
+        if (this.size() === 0) {
             return null;
         }
+        return this.data[0];
     }
 
-    __percolateUp(index) {
-        var parent = Math.floor( (index - 1) / 2)
-        if (index <= 0)
-            return
-        else if (this.heap[parent] < this.heap[index]) {
-            var tmp = this.heap[parent]
-            this.heap[parent] = this.heap[index]
-            this.heap[index] = tmp
-            this.__percolateUp(parent)
+    push(value) {
+        this.data.push(value);
+        this.percolateUp(this.size() - 1);
+    }
+
+    pop() {
+        if (this.size() === 0) {
+            return null;
+        }
+        const result = this.data[0];
+        const last = this.data.pop();
+        if (this.size() !== 0) {
+            this.data[0] = last;
+            this.percolateDown(0);
+        }
+        return result;
+    }
+
+    percolateUp(index) {
+        while (index > 0) {
+            const parentIndex = (index - 1) >> 1;
+            if(this.compareVal(this.data[index][0], this.data[parentIndex][0]) < 0) {
+                this.swap(index, parentIndex);
+                index = parentIndex;
+            } else {
+                break;
+            }
         }
     }
-    __maxHeapify(index) {
-        var left = (index * 2) + 1;
-        var right = (index * 2) + 2;
-        var largest = index;
-        if ((this.elements > left) && (this.heap[largest] < this.heap[left])) {
-            largest = left
+
+    percolateDown(index) {
+        const lastIndex = this.size() - 1;
+        while (true) {
+          const leftIndex = index * 2 + 1;
+          const rightIndex = index * 2 + 2;
+          let findIndex = index;
+    
+          if (
+            leftIndex <= lastIndex &&
+            this.compareVal(this.data[leftIndex][0], this.data[findIndex][0]) < 0
+          ) {
+            findIndex = leftIndex;
+          }
+    
+          if (
+            rightIndex <= lastIndex &&
+            this.compareVal(this.data[rightIndex][0], this.data[findIndex][0]) < 0
+          ) {
+            findIndex = rightIndex;
+          }
+    
+          if (index !== findIndex) {
+            this.swap(index, findIndex);
+            index = findIndex;
+          } else {
+            break;
+          }
         }
-        if ((this.elements > right) && (this.heap[largest] < this.heap[right]))
-            largest = right
-        if (largest != index) {
-            var tmp = this.heap[largest]
-            this.heap[largest] = this.heap[index]
-            this.heap[index] = tmp
-            this.__maxHeapify(largest)
-        }
-    }
+      }
 
-    buildHeap(arr){
-       this.heap = arr;
-       this.elements = this.heap.length;
-       for (var i = this.heap.length - 1; i >= 0; i--){
-           this.__maxHeapify(i)
-       }
-
-    }
-
+      swap(index1, index2) {
+        [this.data[index1], this.data[index2]] = [
+          this.data[index2],
+          this.data[index1],
+        ];
+      }
+    
+      size() {
+        return this.data.length;
+      }
 }
-var heap = new maxHeap()
-var arr =  [6,9,3,4,13,22,1, 30,17]
-heap.buildHeap(arr)
-console.log(heap.getMax())
-
-heap.removeMax()
-
-console.log(heap.getMax())
